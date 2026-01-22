@@ -1,0 +1,1 @@
+print("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", OPENROUTER_API_KEY)
