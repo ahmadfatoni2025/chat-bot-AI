@@ -1,21 +1,19 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from google import genai
-from dotenv import load_dotenv
 import os
 
 class AIChatApp:
-    def __init__(self, host="127.0.0.1", port=8000):
-        # Load .env
-        load_dotenv()
-
-        # Ambil API key dari .env
+    def __init__(self, host="0.0.0.0", port=8000):
+        # Ambil API key dari environment variable server
         self.api_key = os.getenv("GOOGLE_API_KEY")
         if not self.api_key:
-            raise RuntimeError("API_KEY belum di set di .env")
+            raise RuntimeError(
+                "API_KEY belum di set di environment variable server! "
+                "Di Vercel/Heroku/Railway tambahkan environment variable 'GOOGLE_API_KEY'."
+            )
 
         self.client = genai.Client(api_key=self.api_key)
-
         self.host = host
         self.port = port
 
@@ -51,6 +49,7 @@ class AIChatApp:
                 return jsonify({"reply": "Terjadi kesalahan di server."}), 500
 
     def run(self, debug=True):
+        # Host 0.0.0.0 supaya bisa diakses dari jaringan / hosting
         self.app.run(host=self.host, port=self.port, debug=debug)
 
 
