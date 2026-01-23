@@ -1,60 +1,59 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import requests
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from google import genai
+from dotenv import load_dotenv
 import os
-from fastapi.responses import FileResponse
+
+class AIChatApp:
+    def __init__(self, host="127.0.0.1", port=8000):
+        # Load .env
+        load_dotenv()
+
+        # Ambil API key dari .env
+        self.api_key = os.getenv("GOOGLE_API_KEY")
+        if not self.api_key:
+            raise RuntimeError("API_KEY belum di set di .env")
+
+        self.client = genai.Client(api_key=self.api_key)
+
+        self.host = host
+        self.port = port
+
+        self.app = Flask(__name__)
+        CORS(self.app)  # biar frontend bisa fetch tanpa masalah
+
+        self._register_routes()
+
+    def _register_routes(self):
+        @self.app.route("/")
+        def home():
+            return "Backend AI Chatbot aktif. Gunakan POST /chat"
+
+        @self.app.route("/chat", methods=["POST"])
+        def chat():
+            data = request.get_json(silent=True)
+            if not data or "message" not in data:
+                return jsonify({"reply": "Request salah. Kirim JSON dengan field 'message'."}), 400
+
+            message = data["message"].strip()
+            if not message:
+                return jsonify({"reply": "Pesan kosong. Server butuh teks."}), 400
+
+            try:
+                response = self.client.models.generate_content(
+                    model="gemini-3-flash-preview",
+                    contents=message
+                )
+                return jsonify({"reply": response.text})
+
+            except Exception as e:
+                print("ERROR:", e)
+                return jsonify({"reply": "Terjadi kesalahan di server."}), 500
+
+    def run(self, debug=True):
+        self.app.run(host=self.host, port=self.port, debug=debug)
 
 
-app = FastAPI()
-
-class ChatRequest(BaseModel):
-    message: str
-
-OPENROUTER_API_KEY = os.getenv("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")
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL_NAME = "google/gemma-2-9b-it"
-
-@app.get("/")
-def serve_html():
-    return FileResponse("index.html")
-
-@app.post("/chat")
-def chat(req: ChatRequest):
-    if not OPENROUTER_API_KEY:
-        return {"reply": "API key OpenRouter tidak ditemukan"}
-
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost",
-        "X-Title": "AI Chat Bot"
-    }
-
-    payload = {
-        "model": MODEL_NAME,
-        "messages": [
-            {"role": "system", "content": "Jawab singkat dalam Bahasa Indonesia."},
-            {"role": "user", "content": req.message}
-        ]
-    }
-
-    try:
-        res = requests.post(
-            OPENROUTER_URL,
-            headers=headers,
-            json=payload,
-            timeout=60
-        )
-        res.raise_for_status()
-        data = res.json()
-
-        print("RAW RESPONSE:", data)  # DEBUG
-
-        return {
-            "reply": data["choices"][0]["message"]["content"]
-        }
-
-    except Exception as e:
-        return {
-            "reply": f"Terjadi error: {str(e)}"
-        }
+if __name__ == "__main__":
+    chat_app = AIChatApp()
+    chat_app.run()

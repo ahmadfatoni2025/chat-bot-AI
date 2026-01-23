@@ -1,0 +1,4 @@
+flask
+google-genai
+flask-cors
+ollama

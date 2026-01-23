@@ -1,156 +1,263 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>AI Chat Bot</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.chat-container {
-  width: 420px;
-  height: 600px;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.15);
-}
-
-.chat-header {
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
-  font-weight: bold;
-  text-align: center;
-}
-
-.chat-box {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.message {
-  max-width: 80%;
-  margin-bottom: 10px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  white-space: pre-wrap;
-}
-
-.user {
-  align-self: flex-end;
-  background: #dcf8c6;
-}
-
-.bot {
-  align-self: flex-start;
-  background: #eee;
-}
-
-.chat-input {
-  display: flex;
-  border-top: 1px solid #ddd;
-}
-
-.chat-input input {
-  flex: 1;
-  border: none;
-  padding: 10px;
-  font-size: 14px;
-  outline: none;
-}
-
-.chat-input button {
-  border: none;
-  padding: 10px 16px;
-  background: #4caf50;
-  color: white;
-  cursor: pointer;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Jarvis</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome untuk ikon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    /* Scrollbar custom */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Animasi typing */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .typing-indicator span {
+      animation: pulse 1.5s infinite;
+    }
+    
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    /* Efek glassmorphism */
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
 </head>
 
-<body>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen flex items-center justify-center p-4 text-gray-100">
 
-<div class="chat-container">
-  <div class="chat-header">AI Chat Bot</div>
-  <div class="chat-box" id="chatBox"></div>
+  <div class="w-full max-w-md flex flex-col h-[90vh] max-h-[700px]">
+    
+    <!-- Header seperti referensi -->
+    <div class="mb-4 px-1">
+      <div class="mt-2">
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Ai untuk tugas kuliah</h1>
+        <p class="text-gray-400 text-sm mt-1">AI Musuh para dosen, gunakan dengan bijak.</p>
+      </div>
+    </div>
 
-  <div class="chat-input">
-    <input id="messageInput" placeholder="Ketik prompt..." onkeydown="handleEnter(event)">
-    <button id="sendBtn" onclick="sendMessage()">Kirim</button>
+    <!-- Container utama seperti referensi -->
+    <div class="glass-effect rounded-2xl flex-1 flex flex-col overflow-hidden">
+      
+      <!-- Tab navigasi (opsional) -->
+      <div class="flex border-b border-gray-800">
+        <button class="flex-1 py-3 text-center text-sm font-medium text-gray-300 border-b-2 border-purple-500">
+          <i class="fas fa-robot mr-1"></i> AI Assistant
+        </button>
+      </div>
+
+      <!-- Area pesan -->
+      <div
+        id="messages"
+        class="flex-1 p-4 overflow-y-auto flex flex-col space-y-4"
+      >
+        <!-- Pesan selamat datang -->
+       
+      </div>
+
+      <!-- Input area -->
+      <div class="p-4 border-t border-gray-800">
+        <div class="flex items-center gap-2">
+          <div class="flex-1 relative">
+            <input
+              id="userInput"
+              type="text"
+              placeholder="Ask Gift Finder..."
+              class="w-full px-4 py-3 bg-gray-900/50 border border-gray-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent text-sm placeholder-gray-500"
+              onkeydown="if(event.key==='Enter') sendMessage()"
+            />
+            <div class="absolute right-3 top-3 text-gray-500">
+              <i class="fas fa-microphone"></i>
+            </div>
+          </div>
+          <button
+            onclick="sendMessage()"
+            class="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center shadow-lg"
+          >
+            <i class="fas fa-paper-plane text-white"></i>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-const API_URL = "http://127.0.0.1:8000/chat";
+  <!-- JavaScript -->
+  <script>
+    const messagesEl = document.getElementById("messages");
+    const userInput = document.getElementById("userInput");
 
-async function sendMessage() {
-  const input = document.getElementById("messageInput");
-  const button = document.getElementById("sendBtn");
-  const chatBox = document.getElementById("chatBox");
-
-  const message = input.value.trim();
-  if (!message) return;
-
-  // user bubble
-  chatBox.insertAdjacentHTML(
-    "beforeend",
-    `<div class="message user">${message}</div>`
-  );
-
-  input.value = "";
-  button.disabled = true;
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+    // Fungsi untuk menambah pesan
+    function addMessage(role, text) {
+      const messageContainer = document.createElement("div");
+      messageContainer.className = `flex items-start space-x-2 ${role === "user" ? "flex-row-reverse space-x-reverse" : ""}`;
+      
+      // Avatar
+      const avatar = document.createElement("div");
+      avatar.className = `w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold ${role === "user" 
+        ? "bg-gradient-to-r from-blue-500 to-cyan-500" 
+        : "bg-gradient-to-r from-purple-500 to-pink-500"}`;
+      avatar.innerHTML = role === "user" ? "You" : "AI";
+      
+      // Bubble pesan
+      const bubble = document.createElement("div");
+      bubble.className = `max-w-[75%] ${role === "user" ? "text-right" : ""}`;
+      
+      const bubbleContent = document.createElement("div");
+      bubbleContent.className = `inline-block rounded-2xl px-4 py-3 text-sm ${role === "user" 
+        ? "bg-gradient-to-r from-blue-600 to-cyan-600 rounded-br-none" 
+        : "bg-gray-800/70 rounded-bl-none"}`;
+      bubbleContent.textContent = text;
+      
+      // Waktu
+      const time = document.createElement("div");
+      time.className = `text-xs text-gray-500 mt-1 ${role === "user" ? "text-right" : "ml-1"}`;
+      
+      const now = new Date();
+      const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      time.textContent = timeString;
+      
+      // Menyusun elemen
+      bubble.appendChild(bubbleContent);
+      bubble.appendChild(time);
+      
+      messageContainer.appendChild(avatar);
+      messageContainer.appendChild(bubble);
+      
+      messagesEl.appendChild(messageContainer);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    const data = await res.json();
+    // Fungsi untuk saran cepat
+    function quickSuggestion(suggestion) {
+      userInput.value = suggestion;
+      sendMessage();
+    }
 
-    chatBox.insertAdjacentHTML(
-      "beforeend",
-      `<div class="message bot">${data.reply || "Tidak ada balasan dari AI."}</div>`
-    );
+    // Indikator mengetik
+    function showTypingIndicator() {
+      const typingContainer = document.createElement("div");
+      typingContainer.className = "flex items-start space-x-2";
+      typingContainer.id = "typingIndicator";
+      
+      const avatar = document.createElement("div");
+      avatar.className = "w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold";
+      avatar.innerHTML = "AI";
+      
+      const bubble = document.createElement("div");
+      bubble.className = "max-w-[75%]";
+      
+      const bubbleContent = document.createElement("div");
+      bubbleContent.className = "bg-gray-800/70 rounded-2xl rounded-bl-none px-4 py-3 text-sm";
+      
+      const typingText = document.createElement("div");
+      typingText.className = "typing-indicator text-gray-400";
+      typingText.innerHTML = 'Mengetik <span>.</span><span>.</span><span>.</span>';
+      
+      bubbleContent.appendChild(typingText);
+      bubble.appendChild(bubbleContent);
+      
+      typingContainer.appendChild(avatar);
+      typingContainer.appendChild(bubble);
+      
+      messagesEl.appendChild(typingContainer);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
 
-  } catch (err) {
-    chatBox.insertAdjacentHTML(
-      "beforeend",
-      `<div class="message bot">Gagal terhubung ke server.</div>`
-    );
-    console.error(err);
-  } finally {
-    button.disabled = false;
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-}
+    // Fungsi menghapus indikator mengetik
+    function removeTypingIndicator() {
+      const indicator = document.getElementById("typingIndicator");
+      if (indicator) {
+        indicator.remove();
+      }
+    }
 
-function handleEnter(e) {
-  if (e.key === "Enter") {
-    sendMessage();
-  }
-}
-</script>
+    // Fungsi utama mengirim pesan
+    async function sendMessage() {
+      const message = userInput.value.trim();
+      if (!message) return;
+
+      // Tambah pesan user
+      addMessage("user", message);
+      userInput.value = "";
+      
+      // Tampilkan indikator mengetik
+      showTypingIndicator();
+
+      try {
+        // Kirim ke backend (sesuaikan dengan URL backend Anda)
+        const res = await fetch("http://127.0.0.1:8000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+        removeTypingIndicator();
+        addMessage("bot", data.reply || "Saya menemukan beberapa ide hadiah untuk Anda!");
+
+      } catch (err) {
+        removeTypingIndicator();
+        
+        // Fallback respons jika backend tidak tersedia
+        const fallbackResponses = [
+          "Berdasarkan pertanyaan Anda, saya merekomendasikan hadiah personal seperti jam tangan bermerek atau perhiasan.",
+          "Untuk kesempatan ini, pengalaman seperti makan malam romantis atau voucher spa bisa menjadi pilihan bagus.",
+          "Coba pertimbangkan hadiah teknologi seperti headphone nirkabel atau smartwatch.",
+          "Untuk budget terbatas, coba buat hadiah DIY atau album foto yang personal."
+        ];
+        
+        const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        addMessage("bot", randomResponse);
+        
+        console.error("Error:", err);
+      }
+    }
+
+    // Fokus otomatis ke input
+    window.onload = function() {
+      userInput.focus();
+    };
+  </script>
 
 </body>
 </html>
